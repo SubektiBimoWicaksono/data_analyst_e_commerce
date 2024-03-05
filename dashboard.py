@@ -13,6 +13,11 @@ all_df = pd.read_csv("./DataSet_All.csv")
 all_df.sort_values(by="order_approved_at", inplace=True)
 all_df.reset_index(inplace=True)
 
+for col in datetime_cols:
+    all_df[col] = pd.to_datetime(all_df[col])
+
+min_date = all_df["order_approved_at"].min()
+max_date = all_df["order_approved_at"].max()
 
 # Sidebar
 with st.sidebar:
@@ -51,22 +56,9 @@ def create_daily_orders_df(main_df):
     return daily_orders_df
  
 st.title("E-Commerce Public Data Analysis")
-st.write("Welcome to the E-Commerce Public Data Analysis Dashboard. Explore insights and trends from the provided dataset.")
+st.write("Welcome to the E-Commerce Public Data Analysis Dashboard.")
 
 daily_orders_df = create_daily_orders_df(main_df)
-
-# Display the daily orders DataFrame in Streamlit
-st.title("Daily Orders Delivered")
-st.write(daily_orders_df)
-
-st.subheader("Daily Orders Trend")
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(daily_orders_df['order_approved_at'], daily_orders_df['order_count'], marker='o', color='skyblue')
-ax.set_xlabel('Date')
-ax.set_ylabel('Number of Orders')
-ax.set_title('Daily Orders Trend')
-ax.grid(True)
-st.pyplot(fig)
 
 main_df['shipping_month'] = main_df['shipping_limit_date'].dt.month
 month_counts = main_df['shipping_month'].value_counts().sort_index()
@@ -79,7 +71,7 @@ st.title('Transactional Activity by Month')
 
 # Plot the bar chart
 plt.figure(figsize=(10, 6))
-plt.bar(month_counts.index, month_counts.values, color='salmon')  # Ubah warna menjadi 'salmon'
+plt.bar(month_counts.index, month_counts.values, color='skyblue')
 plt.title('Transactional Activity by Month')
 plt.xlabel('Month')
 plt.ylabel('Number of Transactions')
@@ -88,58 +80,16 @@ plt.tight_layout()
 
 # Display the plot in Streamlit
 st.pyplot(plt)
-st.title('Top 10 Best-selling Products')
-st.write('This visualization shows the top 10 best-selling products.')
+st.title('Top 20 Best-selling Products')
+st.write('This visualization shows the top 20 best-selling products.')
 
-# Calculate top 10 best-selling products
+# Calculate top 20 best-selling products
 top_products = main_df['product_category_name'].value_counts().head(20)
 
 # Create bar plot using Seaborn
 plt.figure(figsize=(12, 8))
-sns.barplot(x=top_products.values, y=top_products.index, palette='magma')  # Ubah palet warna menjadi 'magma'
-plt.title('Top 10 Best-selling Products')
+sns.barplot(x=top_products.values, y=top_products.index, palette='cividis')
+plt.title('Top 20 Best-selling Products')
 plt.xlabel('Number of Sales')
 plt.ylabel('Product Category')
 st.pyplot(plt)
-
-st.title('Customer Spending Over Time')
-st.write('This visualization shows the trend of customer spending over time.')
-
-# Create line plot using Seaborn
-plt.figure(figsize=(10, 6))
-sns.lineplot(x='shipping_month', y='payment_value', data=main_df, color='skyblue')  # Ubah warna menjadi 'skyblue'
-plt.title('Customer Spending Over Time')
-plt.xlabel('Month')
-plt.ylabel('Total Payment Value')
-
-# Brazil Mapping
-st.pyplot(plt)
-st.title("Brazil Geolocation Map")
-st.write("Showing geolocation data on the map of Brazil.")
-
-plot_brazil_map(geolocation)
-
-# Distribution of Review Scores
-st.title("Distribution of Review Scores")
-st.write("This chart shows the distribution of review scores.")
-plt.figure(figsize=(8, 6))
-sns.histplot(main_df['review_score'], bins=5, kde=True, color='lightgreen')  # Ubah warna menjadi 'lightgreen'
-plt.title('Distribution of Review Scores')
-plt.xlabel('Review Score')
-plt.ylabel('Count')
-st.pyplot()
-
-
-# Customer Satisfaction Over Time
-st.title("Customer Satisfaction Over Time")
-st.write("This chart shows the trend of customer satisfaction over time.")
-
-plt.figure(figsize=(10, 6))
-sns.lineplot(x='shipping_month', y='review_score', data=main_df, color='gold')  # Ubah warna menjadi 'gold'
-plt.title('Customer Satisfaction Over Time')
-plt.xlabel('Month')
-plt.ylabel('Review Score')
-plt.ylim(0, 5)  
-plt.grid(True) 
-
-st.pyplot()
